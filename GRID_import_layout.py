@@ -1,7 +1,7 @@
 """
 Name: Import GRID layout 
 Autor: Andrea Sulova
-Date: 14th Feb 2024
+Date: 20th Feb 2024
 
 """
 import arcpy
@@ -158,7 +158,7 @@ def excel_table_to_feature_class(excel_file_path, output_gdb_path, output_fc, sh
     arcpy.AddMessage(f"*** Finished ***")
    
 
-# Call function to get the sheet name and cell range
+#--------- Call function to get the sheet name and cell range
 sheet_name, start_cell, end_cell = find_table_in_excel(file_path, "Start point")
 
 # Create a new feature class in the geodatabase
@@ -170,6 +170,21 @@ if not arcpy.Exists(fc_path):
 else:
     arcpy.AddMessage("The feature class already exists in geodatabase")
 
+
+#--------- Adding LayoutName to attribute table
+
+new_field_name = "LAYOUT_NAME"  
+
+# Add the new field to the feature class
+arcpy.AddField_management(output_fc, new_field_name, "TEXT")
+
+# Update the new field with values from an existing field
+with arcpy.da.UpdateCursor(output_fc, [new_field_name]) as cursor:
+    for row in cursor:
+        row[0] = str(output_fc)
+        cursor.updateRow(row)
+
+    
 #--------- Metadata extracted from the data inventory file
 
 # Read dataframe = excel file
